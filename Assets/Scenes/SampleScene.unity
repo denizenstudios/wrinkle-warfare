@@ -445,16 +445,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f7a4a3ed307513142a6d9a75f5e8f325, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraRotate
-  player: {fileID: 609931971}
-  mouseSensitivity: 2
-  minVerticalAngle: -30
-  maxVerticalAngle: 60
-  cameraDistance: 4
-  cameraHeight: 1.5
-  rotationSmoothness: 10
-  lookInput: {x: 0, y: 0}
-  verticalRotation: 0
-  horizontalRotation: 0
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0
@@ -970,7 +960,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ffd801f977a0faf44bb816439effa277, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
+  thirdCam: {fileID: 1847883234}
+  cameraTransform: {fileID: 1847883232}
   walkSpeed: 5
+  rotationSpeed: 10
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0
@@ -1519,6 +1512,7 @@ GameObject:
   - component: {fileID: 1847883230}
   - component: {fileID: 1847883233}
   - component: {fileID: 1847883229}
+  - component: {fileID: 1847883234}
   m_Layer: 0
   m_Name: Third Person Aim Camera
   m_TagString: Untagged
@@ -1641,6 +1635,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Unity.Cinemachine::Unity.Cinemachine.CinemachineRotateWithFollowTarget
   Damping: 0
+--- !u!114 &1847883234
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1847883228}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98b69fd948a7bbd41839120871746953, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ThirdPersonCameraController
+  transitionSpeed: 5
 --- !u!1 &2127345968
 GameObject:
   m_ObjectHideFlags: 0

@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 091ec106c5e026a429afe01e7dbcf31c
+guid: b9f26f6291d6daa49aa282f15ea2b6a3
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
@@ -7,33 +7,18 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: M1_Body
-    second: {fileID: 2100000, guid: 930344df852d8064e95dddec01637dfe, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: M1_Clothes
-    second: {fileID: 2100000, guid: 65c3f244ee53fba4996ee948ed18365f, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: M1_Hair
-    second: {fileID: 2100000, guid: 4d573b50cdc2e0b40892b12b8dcbdf3a, type: 2}
+      name: M2 Clothes
+    second: {fileID: 2100000, guid: 6f544d4ec20dde6439378437b5606d46, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: M_Body
-    second: {fileID: 2100000, guid: 930344df852d8064e95dddec01637dfe, type: 2}
+    second: {fileID: 2100000, guid: b27c73915c7013f40887b5ed4df70e38, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: M_EyeWhite
-    second: {fileID: 2100000, guid: 87cf3b99a0decbc46ac4e15f67971cbd, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: M_bBdy
-    second: {fileID: 2100000, guid: 930344df852d8064e95dddec01637dfe, type: 2}
+      name: M_F1_Hair
+    second: {fileID: 2100000, guid: c8266bccc6b3cb1478ebe6731ab76617, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

@@ -1,111 +1,154 @@
-using UnityEngine;
-using UnityEngine.InputSystem;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
+using UnityEngine;
 
+
+// PHASE: PROTOTYPE
+// PlayerController - Player movement calculations and design.
 public class PlayerController : MonoBehaviour
 {
-    [Header("Refs")]
-    private CharacterController controller;
-    [SerializeField] private ThirdPersonCameraController thirdCam;
+    PlayerManager playerManager;
+    // ProtoAnimationManager animationManager;
+    InputManager input;
+    Vector3 moveDirection;
+    Transform cameraObject;
+    CharacterController characterController;
 
-    [Header("Movement Settings")]
-    [SerializeField] private float walkSpeed = 5f;
-    [SerializeField] private float rotationSmoothTime = 0.1f; // How smoothly player rotates to face movement direction
+    [Header("Falling")]
+    public float inAirTimer;
+    public float leapingVelocity;
+    public float fallingVelocity;
+    public LayerMask groundLayer;
+    public float rayCastHeightOffset = 0.5f;
 
-    [Header("Input")]
-    private PlayerInputActions inputActions;
-    private Vector2 moveInput;
-    private Vector2 lookInput;
-    private bool swapInputPressed;
-    
-    private float currentVelocity; // For smooth rotation
+    [Header("Movement Flags")]
+    public bool isGrounded;
+    public bool isJumping;
+
+    [Header("Movement Speed")]
+    public float movementSpeed = 7f;
+    public float rotationSpeed = 15f;
+
+    [Header("Jump Variables")]
+    public float jumpHeight = 2;
+    public float gravityLvl = -15;
+    public int maxJumpCount = 2;
+    private int jumpCount = 0;
+
+    private float verticalVelocity;
 
     private void Awake()
     {
-        inputActions = new PlayerInputActions();
-        Cursor.visible = false;
-        Cursor.lockState = CursorLockMode.Locked;
+        input = GetComponent<InputManager>();
+        characterController = GetComponent<CharacterController>();
+        cameraObject = Camera.main.transform;
+        playerManager = GetComponent<PlayerManager>();
     }
 
-    private void OnEnable()
+    public void HandleAllMovement()
     {
-        inputActions.Player.Enable();
-        inputActions.Player.CameraSwap.performed += OnCameraSwap;
+        HandleFall();
+        HandleMovement();
+        HandleRotation();
+        if (playerManager.isInteracting)
+            return;
     }
 
-    private void OnDisable()
+    public void HandleMovement()
     {
-        inputActions.Player.Disable();
-        inputActions.Player.CameraSwap.performed -= OnCameraSwap;
-    }
+        moveDirection = cameraObject.forward * input.verticalInput;
+        moveDirection += cameraObject.right * input.horizontalInput;
+        moveDirection.Normalize();
+        moveDirection.y = 0;
+        moveDirection *= movementSpeed;
 
-    private void Start()
-    {
-        controller = GetComponent<CharacterController>();
-    }
-
-    private void Update()
-    {
-        InputManagement();
-        Movement();
-        CameraMovement();
-    }
-
-    private void Movement()
-    {
-        GroundMovement();
-    }
-
-    private void GroundMovement()
-    {
-        // Get camera's transform for relative movement
-        Transform cameraTransform = thirdCam != null ? thirdCam.transform : Camera.main.transform;
+        Vector3 movement = moveDirection * Time.deltaTime;
         
-        // Calculate movement direction relative to camera
-        Vector3 forward = cameraTransform.forward;
-        Vector3 right = cameraTransform.right;
+        movement.y = verticalVelocity * Time.deltaTime;
         
-        // Flatten the directions (remove Y component for ground movement)
-        forward.y = 0;
-        right.y = 0;
-        forward.Normalize();
-        right.Normalize();
-        
-        // Calculate final movement direction
-        Vector3 move = (forward * moveInput.y + right * moveInput.x) * walkSpeed;
-        
-        // Move the character
-        controller.Move(move * Time.deltaTime);
-        
-        // Rotate player to face movement direction (optional - comment out if you want strafing without rotation)
-        if (move.magnitude > 0.1f)
+        characterController.Move(movement);
+    }
+
+    private void HandleFall()
+    {
+        isGrounded = characterController.isGrounded;
+
+        if (isGrounded && verticalVelocity < 0)
         {
-            float targetAngle = Mathf.Atan2(move.x, move.z) * Mathf.Rad2Deg;
-            float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref currentVelocity, rotationSmoothTime);
-            transform.rotation = Quaternion.Euler(0, angle, 0);
+            // Reset vertical velocity when grounded
+            verticalVelocity = -2f; // Small negative value to keep grounded
+            inAirTimer = 0;
+            jumpCount = 0;
+        }
+        else if (!isGrounded && !isJumping)
+        {
+            // if(!playerManager.isInteracting)
+            // {
+            //     animationManager.PlayTargetAnimation("JumpMid", true);
+            // }
+
+            inAirTimer = inAirTimer + Time.deltaTime;
+            
+            // Apply gravity
+            verticalVelocity += gravityLvl * Time.deltaTime;
+            
+            // Optional: Add forward momentum while in air
+            // Note: This is handled differently with CharacterController
+            // You may want to adjust the leapingVelocity application
+        }
+        else
+        {
+            // Apply gravity when jumping
+            verticalVelocity += gravityLvl * Time.deltaTime;
         }
     }
 
-    private void CameraMovement()
+    private void HandleRotation()
     {
-        if (thirdCam != null)
-        {
-            thirdCam.RotateCamera(lookInput);
-        }
-    }
-   
-    private void InputManagement()
-    {
-        moveInput = inputActions.Player.Movement.ReadValue<Vector2>();
-        lookInput = inputActions.Player.Camera.ReadValue<Vector2>();
+        Vector3 targetDirection = Vector3.zero;
+
+        targetDirection = cameraObject.forward;
+        targetDirection.y = 0;
+        targetDirection.Normalize();
+
+        if (targetDirection == Vector3.zero)
+            targetDirection = transform.forward;
+
+        Quaternion targetRotation = Quaternion.LookRotation(targetDirection);
+        Quaternion playerRotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+        transform.rotation = playerRotation;
     }
 
-    private void OnCameraSwap(InputAction.CallbackContext context)
+    public void HandleJump()
     {
-        if (thirdCam != null)
+        // CharacterController's isGrounded is more reliable than manual raycasting
+        if (isGrounded || jumpCount < maxJumpCount)
         {
-            thirdCam.ShoulderSwap();
+            // animationManager.animator.SetBool("isJumping", true);
+            // animationManager.PlayTargetAnimation("JumpStart", false);
+
+            float jumpVelocity = Mathf.Sqrt(-2 * gravityLvl * jumpHeight);
+            verticalVelocity = jumpVelocity;
+            
+            jumpCount++;
+            isGrounded = false;
+            isJumping = true;
         }
+    }
+
+    public void ResetMovement()
+    {
+        if (characterController != null)
+        {
+            verticalVelocity = 0;
+        }
+
+        moveDirection = Vector3.zero;
+
+        // if (animationManager != null)
+        // {
+        //     animationManager.PlayTargetAnimation("Idle", true);
+        // }
     }
 }

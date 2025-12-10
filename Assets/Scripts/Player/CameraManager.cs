@@ -4,9 +4,9 @@ public class CameraManager : MonoBehaviour
 {
     InputManager inputManager;
 
-    public Transform targetTransform;   // The object the camera follows
-    public Transform cameraPivot;       // The object the camera pivots around
-    public Transform cameraTransform;   // The camera object
+    public Transform targetTransform;
+    public Transform cameraPivot;
+    public Transform cameraTransform;
     public LayerMask collisionLayers;
 
     private float defaultPosition;
@@ -19,7 +19,7 @@ public class CameraManager : MonoBehaviour
     public float cameraCollisionRadius = 0.2f;
 
     [Header("Camera Speeds")]
-    public float cameraFollowSpeed = 0.1f;
+    public float cameraFollowSpeed = 0.05f;
 
     [Header("Sensitivity")]
     public float mouseSensitivity = 2f;
@@ -33,24 +33,31 @@ public class CameraManager : MonoBehaviour
 
     [Header("Over-The-Shoulder Settings")]
     public bool useOverTheShoulder = true;
-    public float shoulderOffset = -1.5f;  // How far to offset the camera to the right
-    public float shoulderHeight = 0.75f;  // Height offset for the pivot
-    public float cameraDistance = -3f;
+    public float rightShoulderOffset = -1f;
+    public float leftShoulderOffset = 1f;
+    public float shoulderHeight = 0.3f;
+    public float cameraDistance = -2.5f;
+    private bool isLeftShoulder = false;
+    [SerializeField] private float shoulderLerpSpeed = 2f;
+    private float shoulderLerp = 1f;
+
+    [Header("Zoom Settings")]
+    public float zoomedDistance = -1f;
+    public float zoomLerpSpeed = 0.008f;
+    private float currentZoomDistance;
 
     private void Awake()
     {
         inputManager = FindObjectOfType<InputManager>();
         cameraTransform = Camera.main.transform;
         
-        // Set the initial camera position with all offsets
         Vector3 localPos = cameraTransform.localPosition;
         localPos.z = cameraDistance;
         cameraTransform.localPosition = localPos;
+
+        defaultPosition = cameraDistance;
+        currentZoomDistance = cameraDistance;
         
-        // NOW capture the default position after setting it
-        defaultPosition = cameraDistance;  // Use the variable, not the current position
-        
-        // Lock and hide cursor for better aiming experience
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
@@ -78,11 +85,18 @@ public class CameraManager : MonoBehaviour
 
         transform.position = targetPosition;
 
-        // Apply over-the-shoulder offset
         if (useOverTheShoulder)
         {
-            // Offset the pivot to the side and up
-            cameraPivot.localPosition = new Vector3(shoulderOffset, shoulderHeight, 0);
+            // Only lerp if not at target
+            if (shoulderLerp < 1f)
+            {
+                shoulderLerp = Mathf.Clamp01(shoulderLerp + Time.deltaTime * shoulderLerpSpeed);
+            }
+            
+            float targetShoulderOffset = isLeftShoulder ? leftShoulderOffset : rightShoulderOffset;
+            float startShoulderOffset = isLeftShoulder ? rightShoulderOffset : leftShoulderOffset;
+            float currentShoulderOffset = Mathf.Lerp(startShoulderOffset, targetShoulderOffset, shoulderLerp);
+            cameraPivot.localPosition = new Vector3(currentShoulderOffset, shoulderHeight, 0);
         }
         else
         {
@@ -100,16 +114,19 @@ public class CameraManager : MonoBehaviour
 
         pivotAngle = Mathf.Clamp(pivotAngle, minPivotAngle, maxPivotAngle);
 
-        // Rotate the camera rig (horizontal rotation)
         transform.rotation = Quaternion.Euler(0, lookAngle, 0);
         
-        // Rotate the pivot (vertical rotation)
         cameraPivot.localRotation = Quaternion.Euler(pivotAngle, 0, 0);
     }
 
     private void HandleCameraCollision()
     {
-        float targetPosition = defaultPosition;
+        float targetZoomDistance = inputManager.zoomInput ? zoomedDistance : defaultPosition;
+        
+        // Smoothly ease zoom in and out
+        currentZoomDistance = Mathf.Lerp(currentZoomDistance, targetZoomDistance, zoomLerpSpeed);
+        
+        float targetPosition = currentZoomDistance;
         RaycastHit hit;
         Vector3 direction = cameraTransform.position - cameraPivot.position;
         direction.Normalize();
@@ -129,13 +146,17 @@ public class CameraManager : MonoBehaviour
         cameraTransform.localPosition = cameraVectorPosition;
     }
 
-    // Get the direction the camera is facing for aiming
     public Vector3 GetAimDirection()
     {
         return cameraTransform.forward;
     }
 
-    // Get the point where the reticle is aiming in world space
+    public void SwapShoulder()
+    {
+        isLeftShoulder = !isLeftShoulder;
+        shoulderLerp = 0f;
+    }
+
     public Vector3 GetAimPoint(float maxDistance = 100f)
     {
         Ray ray = new Ray(cameraTransform.position, cameraTransform.forward);

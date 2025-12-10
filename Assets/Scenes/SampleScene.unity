@@ -871,9 +871,13 @@ MonoBehaviour:
   minPivotAngle: -65
   maxPivotAngle: 45
   useOverTheShoulder: 1
-  shoulderOffset: -1.5
-  shoulderHeight: 0.75
-  cameraDistance: -3
+  rightShoulderOffset: -1
+  leftShoulderOffset: 1
+  shoulderHeight: 0.3
+  cameraDistance: -2.5
+  shoulderLerpSpeed: 0.9
+  zoomedDistance: -1
+  zoomLerpSpeed: 0.008
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0
@@ -1421,6 +1425,7 @@ MonoBehaviour:
   verticalInput: 0
   horizontalInput: 0
   jumpInput: 0
+  zoomInput: 0
   cameraInputX: 0
   cameraInputY: 0
   isUsingGamepad: 0
@@ -1445,11 +1450,11 @@ MonoBehaviour:
   rayCastHeightOffset: 0.5
   isGrounded: 0
   isJumping: 0
-  movementSpeed: 7
-  rotationSpeed: 15
-  jumpHeight: 2
+  movementSpeed: 8
+  rotationSpeed: 50
+  jumpHeight: 1.5
   gravityLvl: -15
-  maxJumpCount: 2
+  maxJumpCount: 1
 --- !u!114 &1325829051
 MonoBehaviour:
   m_ObjectHideFlags: 0

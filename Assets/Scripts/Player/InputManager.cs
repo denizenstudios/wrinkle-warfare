@@ -1,11 +1,12 @@
 using UnityEngine;
-using UnityEngine.InputSystem; // Required for new Input System
+using UnityEngine.InputSystem;
 
 public class InputManager : MonoBehaviour
 {
     ThirdPerControls thirdPerControls;
     // ProtoAnimationManager protoAnimationManager;
-    PlayerTController playerTController;
+    PlayerController playerController;
+    CameraManager cameraManager;
 
     public Vector2 movementInput;
     public Vector2 cameraInput;
@@ -14,6 +15,7 @@ public class InputManager : MonoBehaviour
     public float horizontalInput;
 
     public bool jumpInput;
+    public bool zoomInput;
 
     public float cameraInputX;
     public float cameraInputY;
@@ -23,7 +25,8 @@ public class InputManager : MonoBehaviour
     private void Awake()
     {
         // protoAnimationManager = GetComponent<ProtoAnimationManager>();
-        playerTController = GetComponent<PlayerTController>();
+        playerController = GetComponent<PlayerController>();
+        cameraManager = FindObjectOfType<CameraManager>();
     }
 
     private void Start()
@@ -58,7 +61,19 @@ public class InputManager : MonoBehaviour
         }
 
         thirdPerControls.Enable();
-}
+    }
+
+    private void Update()
+    {
+        // Check for right mouse button zoom
+        zoomInput = Mouse.current != null && Mouse.current.rightButton.isPressed;
+        
+        // Check for camera swap input (X key)
+        if (Keyboard.current != null && Keyboard.current.xKey.wasPressedThisFrame)
+        {
+            cameraManager.SwapShoulder();
+        }
+    }
 
 
     private void OnDisable()
@@ -89,7 +104,7 @@ public class InputManager : MonoBehaviour
         if (jumpInput)
         {
             jumpInput = false;
-            playerTController.HandleJump();
+            playerController.HandleJump();
         }
     }
 

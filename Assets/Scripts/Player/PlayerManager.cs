@@ -4,11 +4,11 @@ using UnityEngine;
 // PHASE: PROTOTYPE
 // Player Manager - a script used to execute all functionality created for a player character
 
-public class PlayerTManager : MonoBehaviour
+public class PlayerManager : MonoBehaviour
 {
     // Animator animator;
     InputManager input;
-    PlayerTController playerTController;
+    PlayerController playerController;
     // [SerializeField] private DialogueUI dialogueUI;
     public CameraManager cameraManager;
     public bool isInteracting;
@@ -17,7 +17,7 @@ public class PlayerTManager : MonoBehaviour
     private void Awake()
     {
         input = GetComponent<InputManager>();
-        playerTController = GetComponent<PlayerTController>();
+        playerController = GetComponent<PlayerController>();
         // animator = GetComponent<Animator>();
     }
 
@@ -31,16 +31,12 @@ public class PlayerTManager : MonoBehaviour
         
         // if (dialogueUI.isOpen)
         // {
-        //     playerTController.ResetMovement();
+        //     playerController.ResetMovement();
         //     return;
         // }
         
         input.HandleAllInputs();
-    }
-
-    private void FixedUpdate()
-    {
-        playerTController.HandleAllMovement();
+        playerController.HandleAllMovement();
     }
 
     private void LateUpdate()
@@ -48,7 +44,7 @@ public class PlayerTManager : MonoBehaviour
         cameraManager.HandleAllCameraMovement();
     
         // isInteracting = animator.GetBool("isInteracting");
-        // playerTController.isJumping = animator.GetBool("isJumping");
-        // animator.SetBool("isGrounded", playerTController.isGrounded);
+        // playerController.isJumping = animator.GetBool("isJumping");
+        // animator.SetBool("isGrounded", playerController.isGrounded);
     }
 }

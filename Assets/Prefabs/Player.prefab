@@ -40,8 +40,12 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4683472337892962949}
+  - component: {fileID: 8324239606115380234}
   - component: {fileID: 4170355897908353271}
-  - component: {fileID: 4703389350779381574}
+  - component: {fileID: 959655839898977713}
+  - component: {fileID: 7333788474806717893}
+  - component: {fileID: 979580752940981036}
+  - component: {fileID: 402440149252957752}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -66,6 +70,29 @@ Transform:
   - {fileID: 5609356616132293086}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!136 &8324239606115380234
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6589510424402025471}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.5
+  m_Height: 1
+  m_Direction: 1
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!143 &4170355897908353271
 CharacterController:
   m_ObjectHideFlags: 0
@@ -84,14 +111,14 @@ CharacterController:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Height: 1.4
+  m_Height: 2
   m_Radius: 0.5
   m_SlopeLimit: 45
   m_StepOffset: 0.3
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
-  m_Center: {x: 0, y: 0.7, z: 0}
---- !u!114 &4703389350779381574
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &959655839898977713
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -100,11 +127,72 @@ MonoBehaviour:
   m_GameObject: {fileID: 6589510424402025471}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ffd801f977a0faf44bb816439effa277, type: 3}
+  m_Script: {fileID: 11500000, guid: 40eccbd37b7a1e3429de6826c578dbe3, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerController
-  thirdCam: {fileID: 0}
-  walkSpeed: 5
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerTController
+  inAirTimer: 0
+  leapingVelocity: 0
+  fallingVelocity: 33
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 1
+  rayCastHeightOffset: 0.5
+  isGrounded: 0
+  isJumping: 0
+  movementSpeed: 8
+  rotationSpeed: 50
+  jumpHeight: 1.5
+  gravityLvl: -15
+  maxJumpCount: 1
+--- !u!114 &7333788474806717893
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6589510424402025471}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bf59d461582ad5a40b7289c3616e67a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerManager
+  cameraManager: {fileID: 0}
+  isInteracting: 0
+--- !u!114 &979580752940981036
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6589510424402025471}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1b3eaf5654c34d24dad01e76da131bad, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InputManager
+  movementInput: {x: 0, y: 0}
+  cameraInput: {x: 0, y: 0}
+  moveAmount: 0
+  verticalInput: 0
+  horizontalInput: 0
+  jumpInput: 0
+  zoomInput: 0
+  cameraInputX: 0
+  cameraInputY: 0
+  isUsingGamepad: 0
+--- !u!114 &402440149252957752
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6589510424402025471}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5be1a47ccb1b1864bb0058f947b30cfd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerHealth
+  maxHealth: 100
 --- !u!1001 &4123300697695008541
 PrefabInstance:
   m_ObjectHideFlags: 0

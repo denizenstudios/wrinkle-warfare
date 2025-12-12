@@ -1,6 +1,7 @@
 using UnityEngine;
+using Unity.Netcode; // Add this for NGO
 
-public class CameraManager : MonoBehaviour
+public class CameraManager : NetworkBehaviour // Changed from MonoBehaviour
 {
     InputManager inputManager;
 
@@ -48,27 +49,60 @@ public class CameraManager : MonoBehaviour
 
     private void Awake()
     {
-        inputManager = FindObjectOfType<InputManager>();
-        cameraTransform = Camera.main.transform;
-        
-        Vector3 localPos = cameraTransform.localPosition;
-        localPos.z = cameraDistance;
-        cameraTransform.localPosition = localPos;
+        // Don't initialize anything here - wait for network spawn
+    }
 
-        defaultPosition = cameraDistance;
-        currentZoomDistance = cameraDistance;
+    public override void OnNetworkSpawn()
+    {
+        base.OnNetworkSpawn();
         
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+        // Only initialize for the local player
+        if (!IsOwner)
+        {
+            // Disable camera components for remote players
+            Camera cam = GetComponentInChildren<Camera>();
+            if (cam != null)
+            {
+                cam.enabled = false;
+                AudioListener listener = cam.GetComponent<AudioListener>();
+                if (listener != null) listener.enabled = false;
+            }
+            
+            // Disable this script for remote players
+            enabled = false;
+            return;
+        }
+        
+        // Local player setup
+        inputManager = FindObjectOfType<InputManager>();
+        
+        if (Camera.main != null)
+        {
+            cameraTransform = Camera.main.transform;
+            
+            Vector3 localPos = cameraTransform.localPosition;
+            localPos.z = cameraDistance;
+            cameraTransform.localPosition = localPos;
+
+            defaultPosition = cameraDistance;
+            currentZoomDistance = cameraDistance;
+            
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
     }
 
     private void LateUpdate()
     {
+        // Only runs on local player due to enabled check in OnNetworkSpawn
         HandleAllCameraMovement();
     }
 
     public void HandleAllCameraMovement()
     {
+        if (targetTransform == null || cameraPivot == null)
+            return;
+
         FollowTarget();
         RotateCamera();
         HandleCameraCollision();
@@ -106,6 +140,9 @@ public class CameraManager : MonoBehaviour
 
     private void RotateCamera()
     {
+        if (inputManager == null || cameraPivot == null)
+            return;
+
         float sensitivity = inputManager.isUsingGamepad ? controllerSensitivity * Time.deltaTime : mouseSensitivity;
 
         // Camera rotation drives the aim
@@ -121,6 +158,9 @@ public class CameraManager : MonoBehaviour
 
     private void HandleCameraCollision()
     {
+        if (cameraTransform == null || cameraPivot == null)
+            return;
+
         float targetZoomDistance = inputManager.zoomInput ? zoomedDistance : defaultPosition;
         
         // Smoothly ease zoom in and out

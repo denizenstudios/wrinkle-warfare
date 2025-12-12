@@ -42,7 +42,12 @@ public class PlayerController : MonoBehaviour
     {
         input = GetComponent<InputManager>();
         characterController = GetComponent<CharacterController>();
-        cameraObject = Camera.main.transform;
+        
+        if (Camera.main != null)
+        {
+            cameraObject = Camera.main.transform;
+        }
+        
         playerManager = GetComponent<PlayerManager>();
     }
 

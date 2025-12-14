@@ -2,11 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using Unity.Netcode;
 
 
 // PHASE: PROTOTYPE
 // PlayerController - Player movement calculations and design.
-public class PlayerController : MonoBehaviour
+public class PlayerController : NetworkBehaviour
 {
     PlayerManager playerManager;
     // ProtoAnimationManager animationManager;
@@ -14,6 +15,7 @@ public class PlayerController : MonoBehaviour
     Vector3 moveDirection;
     Transform cameraObject;
     CharacterController characterController;
+    NetworkObject networkObject;
 
     [Header("Falling")]
     public float inAirTimer;
@@ -42,17 +44,28 @@ public class PlayerController : MonoBehaviour
     {
         input = GetComponent<InputManager>();
         characterController = GetComponent<CharacterController>();
+        playerManager = GetComponent<PlayerManager>();
+        networkObject = GetComponentInParent<NetworkObject>();
+    }
+
+    public override void OnNetworkSpawn()
+    {
+        base.OnNetworkSpawn();
         
         if (Camera.main != null)
         {
             cameraObject = Camera.main.transform;
         }
         
-        playerManager = GetComponent<PlayerManager>();
+        Debug.Log($"PlayerController - IsOwner: {IsOwner}, HasCamera: {cameraObject != null}");
     }
 
     public void HandleAllMovement()
     {
+        // Only process movement if owner
+        if (!IsOwner)
+            return;
+
         HandleFall();
         HandleMovement();
         HandleRotation();
@@ -62,6 +75,13 @@ public class PlayerController : MonoBehaviour
 
     public void HandleMovement()
     {
+        // Only move if owner
+        if (!IsOwner)
+            return;
+
+        if (cameraObject == null)
+            return;
+
         moveDirection = cameraObject.forward * input.verticalInput;
         moveDirection += cameraObject.right * input.horizontalInput;
         moveDirection.Normalize();
@@ -77,6 +97,13 @@ public class PlayerController : MonoBehaviour
 
     private void HandleFall()
     {
+        // Only apply gravity if owner
+        if (!IsOwner)
+            return;
+
+        if (characterController == null)
+            return;
+
         isGrounded = characterController.isGrounded;
 
         if (isGrounded && verticalVelocity < 0)
@@ -111,6 +138,13 @@ public class PlayerController : MonoBehaviour
 
     private void HandleRotation()
     {
+        // Only rotate if owner
+        if (!IsOwner)
+            return;
+
+        if (cameraObject == null)
+            return;
+
         Vector3 targetDirection = Vector3.zero;
 
         targetDirection = cameraObject.forward;

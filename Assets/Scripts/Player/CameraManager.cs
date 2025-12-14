@@ -1,7 +1,7 @@
 using UnityEngine;
 using Unity.Netcode; // Add this for NGO
 
-public class CameraManager : NetworkBehaviour // Changed from MonoBehaviour
+public class CameraManager : NetworkBehaviour
 {
     InputManager inputManager;
 
